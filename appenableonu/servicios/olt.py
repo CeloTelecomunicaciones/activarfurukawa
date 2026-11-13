@@ -94,10 +94,6 @@ def configure_onu(tn, onu_id):
         try:
             response = tn.read_until(b"#", timeout=5).decode('ascii')
             print(f"ONU Info Response: {response}")
-            return {
-                "success": True,
-                "message": f"ONU encontrada: {onu_id}"
-            }
         except Exception as e:
             print(f"Failed to read ONU info response: {e}")
             return {
