@@ -94,9 +94,16 @@ def configure_onu(tn, onu_id):
         try:
             response = tn.read_until(b"#", timeout=5).decode('ascii')
             print(f"ONU Info Response: {response}")
+            return {
+                "success": True,
+                "message": f"ONU encontrada: {onu_id}"
+            }
         except Exception as e:
             print(f"Failed to read ONU info response: {e}")
-            return
+            return {
+                "success": False,
+                "message": "Falla al leer la información de la ONU."
+            }   
 
         #cosas que importantes: X/Y (placa/puerto donde esta la onu)
         #Active
@@ -105,7 +112,10 @@ def configure_onu(tn, onu_id):
         #si es Activo pasar a sacar placa y puerto, si no es activo no hacer nada
         if "Active" not in response:
             print(f"ONU ID {onu_id} is not active. Skipping configuration.")
-            return
+            return {
+                "success": False,
+                "message": "La ONU no está activa."
+            }
 
         #ONU Info Response:  show onu info | include 4f6ae908
         #1/1 |   5 | Inactive | TPLG4f6ae908 |   5544m  | -          | oother_models 
@@ -121,8 +131,10 @@ def configure_onu(tn, onu_id):
 
         if not board_port_info:
             print(f"Could not find board/port information for ONU ID {onu_id}")
-            return
-
+            return {
+                "success": False,
+                "message": "No se encontró información de placa/puerto para la ONU."
+            }   
 
         identificador_onu = None
         for line in response.splitlines():
@@ -133,8 +145,11 @@ def configure_onu(tn, onu_id):
 
         if not identificador_onu:
             print(f"Could not find ONU identifier for ONU ID {onu_id}")
-            return
-        
+            return {
+                "success": False,
+                "message": "No se encontró identificador para la ONU."
+            }
+
         # Enter GPON mode and configure the ONU
         tn.write(b"gpon\n")
         tn.write(f"gpon-olt {board_port_info}\n".encode('ascii'))
@@ -148,11 +163,13 @@ def configure_onu(tn, onu_id):
         
         
         #si esta oother models en el ultimo elemento de la linea es poque se activo coorrectamente
-        
         for line in response.splitlines():
             if onu_id in line and "Active" in line:
                 if "oother_models" in line:
                     print(f"ONU ID {identificador_onu} configured successfully on board/port {board_port_info}. Response: {response}")
+                    time.sleep(5)
+                    # Save the configuration
+                    tn.write(b"write memory\n")
                     return {
                         "success": True,
                         "message": f"ONU con ID {identificador_onu} configurada exitosamente en placa/puerto {board_port_info}."
@@ -163,16 +180,7 @@ def configure_onu(tn, onu_id):
                         "success": False,
                         "message": f"Falla al configurar la ONU con ID {identificador_onu} en placa/puerto {board_port_info}."
                     }
-
-        time.sleep(5)
-        # Save the configuration
-        tn.write(b"write memory\n")
-        
-        print("ONU configuration completed successfully")
-        return {
-            "success": True,
-            "message": f"ONU con ID {identificador_onu} configurada exitosamente en placa/puerto {board_port_info}."
-        }
+    
     except Exception as e:
         print(f"Failed to configure ONU: {e}")
         return {
