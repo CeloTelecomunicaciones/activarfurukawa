@@ -1,0 +1,37 @@
+
+{% load bootstrap5 %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}Gestión Furukawa{% endblock %}</title>
+
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                Gestión OLT Furukawa
+            </a>
+        </div>
+    </nav>
+
+    <main class="container py-4">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <footer class="text-center text-muted py-3">
+        <small>Sistema de gestión de ONUs</small>
+    </footer>
+
+</body>
+</html>

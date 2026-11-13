@@ -1,0 +1,104 @@
+
+{% extends "master.html" %}
+
+{% block title %}Habilitación ONU{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center mt-5">
+
+    <div class="col-md-6">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Habilitación de ONU</h5>
+            </div>
+            
+            <div class="card-body">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'habilitar_onu' %}">
+
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+
+                        <label for="mac" class="form-label">
+                            Dirección MAC del equipo
+                        </label>
+
+                        <input
+                            type="text"
+                            id="mac"
+                            name="mac"
+                            class="form-control form-control-lg text-center"
+                            placeholder="AA:BB:CC:DD:EE:FF"
+                            maxlength="17"
+                            autocomplete="off"
+                            value="{{ mac|default:'' }}"
+                            required
+                        >
+
+                        <div class="form-text">
+                            Ingrese la MAC de la ONU.
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            Habilitar ONU
+                        </button>
+
+                        <button type="button" class="btn btn-outline-secondary" id="limpiar">
+                            Limpiar
+                        </button>
+                    </div>   
+                         
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const macInput = document.getElementById("mac");
+
+    macInput.addEventListener("input", function () {
+
+        let valor = this.value.replace(/[^a-fA-F0-9]/g, "");
+        valor = valor.substring(0, 12);
+
+        let grupos = valor.match(/.{1,2}/g);
+
+        this.value = grupos
+            ? grupos.join(":").toUpperCase()
+            : "";
+
+    });
+
+    document.getElementById("limpiar").addEventListener("click", function () {
+
+        macInput.value = "";
+        macInput.focus();
+
+    });
+
+});
+</script>
+
+{% endblock %}
