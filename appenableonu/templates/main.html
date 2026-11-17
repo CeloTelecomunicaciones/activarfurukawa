@@ -6,15 +6,14 @@
 {% block content %}
 
 <div class="row justify-content-center mt-5">
-
-    <div class="col-md-6">
+    <div class="col-md-9">
 
         <div class="card shadow-sm">
 
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">Habilitación de ONU</h5>
             </div>
-            
+
             <div class="card-body">
 
                 {% if messages %}
@@ -26,76 +25,172 @@
                 {% endif %}
 
                 <form method="POST" action="{% url 'habilitar_onu' %}">
-
                     {% csrf_token %}
 
-                    <div class="mb-3">
+                    <div class="row">
 
-                        <label for="mac" class="form-label">
-                            Dirección MAC del equipo
-                        </label>
+                        <!-- SELECTOR VERTICAL -->
+                        <div class="col-md-3 border-end">
 
-                        <input
-                            type="text"
-                            id="mac"
-                            name="mac"
-                            class="form-control form-control-lg text-center"
-                            placeholder="AA:BB:CC:DD:EE:FF"
-                            maxlength="17"
-                            autocomplete="off"
-                            value="{{ mac|default:'' }}"
-                            required
-                        >
+                            <label class="form-label fw-bold">
+                                Fabricante
+                            </label>
 
-                        <div class="form-text">
-                            Ingrese la MAC de la ONU.
+                            <div class="d-grid gap-2">
+
+                                <input
+                                    type="radio"
+                                    class="btn-check"
+                                    name="fabricante"
+                                    id="tplink"
+                                    value="tplink"
+                                    checked
+                                >
+
+                                <label class="btn btn-outline-primary"
+                                       for="tplink">
+                                    TP-Link
+                                </label>
+
+                                <input
+                                    type="radio"
+                                    class="btn-check"
+                                    name="fabricante"
+                                    id="huawei"
+                                    value="huawei"
+                                >
+
+                                <label class="btn btn-outline-primary"
+                                       for="huawei">
+                                    Huawei
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                        <!-- FORMULARIO -->
+                        <div class="col-md-9 ps-md-4">
+
+                            <div class="mb-3">
+
+                                <label for="identificador"
+                                       class="form-label"
+                                       id="label-identificador">
+                                    Dirección MAC del equipo
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="identificador"
+                                    name="identificador"
+                                    class="form-control form-control-lg text-center"
+                                    placeholder="AA:BB:CC:DD:EE:FF"
+                                    maxlength="17"
+                                    autocomplete="off"
+                                    required
+                                >
+
+                                <div class="form-text" id="ayuda">
+                                    Ingrese la MAC de la ONU.
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex gap-2 mt-3">
+
+                                <button type="submit"
+                                        class="btn btn-primary flex-grow-1">
+                                    Habilitar ONU
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        id="limpiar">
+                                    Limpiar
+                                </button>
+
+                            </div>
+
                         </div>
 
                     </div>
-
-                    <div class="d-flex gap-2 mt-3">
-                        <button type="submit" class="btn btn-primary flex-grow-1">
-                            Habilitar ONU
-                        </button>
-
-                        <button type="button" class="btn btn-outline-secondary" id="limpiar">
-                            Limpiar
-                        </button>
-                    </div>   
-                         
                 </form>
 
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    const macInput = document.getElementById("mac");
+    const input = document.getElementById("identificador");
+    const label = document.getElementById("label-identificador");
+    const ayuda = document.getElementById("ayuda");
 
-    macInput.addEventListener("input", function () {
+    const fabricantes = document.querySelectorAll(
+        'input[name="fabricante"]'
+    );
+
+    function actualizarFabricante() {
+
+        const fabricante = document.querySelector(
+            'input[name="fabricante"]:checked'
+        ).value;
+
+        input.value = "";
+
+        if (fabricante === "tplink") {
+
+            label.textContent = "Dirección MAC del equipo";
+            input.placeholder = "AA:BB:CC:DD:EE:FF";
+            input.maxLength = 17;
+            ayuda.textContent = "Ingrese la MAC de la ONU.";
+
+        } else {
+
+            label.textContent = "Número de serie de la ONU";
+            input.placeholder = "48575443914104A4";
+            input.maxLength = 16;
+            ayuda.textContent = "Ingrese los 16 caracteres hexadecimales.";
+
+        }
+    }
+
+    fabricantes.forEach(function (radio) {
+        radio.addEventListener("change", actualizarFabricante);
+    });
+
+    input.addEventListener("input", function () {
+
+        const fabricante = document.querySelector(
+            'input[name="fabricante"]:checked'
+        ).value;
 
         let valor = this.value.replace(/[^a-fA-F0-9]/g, "");
-        valor = valor.substring(0, 12);
 
-        let grupos = valor.match(/.{1,2}/g);
+        if (fabricante === "tplink") {
 
-        this.value = grupos
-            ? grupos.join(":").toUpperCase()
-            : "";
+            valor = valor.substring(0, 12);
+
+            const grupos = valor.match(/.{1,2}/g);
+
+            this.value = grupos
+                ? grupos.join(":").toUpperCase()
+                : "";
+
+        } else {
+
+            this.value = valor.substring(0, 16).toUpperCase();
+
+        }
 
     });
 
     document.getElementById("limpiar").addEventListener("click", function () {
-
-        macInput.value = "";
-        macInput.focus();
-
+        input.value = "";
+        input.focus();
     });
 
 });

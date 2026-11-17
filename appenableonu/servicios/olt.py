@@ -21,6 +21,7 @@ def connect_to_telnet():
             "message": "Falla al conectar al OLT."
         }
 
+
 def login(tn):
     try:
         username = settings.OLT_USERNAME
@@ -44,6 +45,7 @@ def login(tn):
             "success": False,
             "message": "Falla al iniciar sesión."
         }
+
 
 def enable_mode(tn):
     try:

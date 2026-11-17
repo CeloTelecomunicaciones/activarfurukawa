@@ -9,24 +9,23 @@ def main(request):
 
 def habilitar_onu(request):
 
-    if request.method != "POST":
-        return redirect("main")
+    if request.method == "POST":
 
-    mac = request.POST.get("mac", "").strip().upper()
+        fabricante = request.POST.get("fabricante")
+        identificador = request.POST.get("identificador", "").strip()
 
-    mac_limpia = mac.replace(":", "")
+        if fabricante == "tplink":
+            resultado = habilitar(identificador)
 
-    if len(mac_limpia) != 12 or any(
-        c not in "0123456789ABCDEF" for c in mac_limpia
-    ):
-        messages.error(request, "La dirección MAC no es válida.")
-        return redirect("main")
+        elif fabricante == "huawei":
+            resultado = habilitar(identificador)
 
-    resultado = habilitar(mac)
+        else:
+            resultado = "Fabricante no válido"
 
-    if resultado["success"]:
-        messages.success(request, resultado["message"])
-    else:
-        messages.error(request, resultado["message"])
+        if resultado["success"]:
+            messages.success(request, resultado["message"])
+        else:
+            messages.error(request, resultado["message"])
 
-    return render(request, "main.html", {"mac": mac})
+    return render(request, "main.html")
